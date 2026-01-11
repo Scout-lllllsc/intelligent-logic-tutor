@@ -1,0 +1,66 @@
+\documentclass[12pt,a4paper]{article}
+
+% ---------- Packages ----------
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{parskip} % nicer spacing
+\usepackage{titlesec}
+\usepackage{float}
+
+\titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
+
+% ---------- Title Info ----------
+\title{
+Early Term Progress Check Report\\
+\large BBC6521 Project (2025/26)
+}
+\author{
+Luo Sicheng\\
+BUPT No.: 2022213579 \\
+QM No.: 221171556
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Briefly introduce the motivation: students find sequential circuits hard; your system combines a simulator and an AI tutor to support learning and design.
+
+\section{Project Scope}
+State the scope clearly:
+\begin{itemize}
+  \item In-scope: sequential circuits, focusing on D flip-flops and simple counter circuits; GUI-based circuit construction; basic logic simulation; AI tutor for Q\&A and explanations.
+  \item Out-of-scope: industrial-level timing analysis, HDL (Verilog/VHDL), complex FSMs, physical/electrical modeling.
+\end{itemize}
+
+\section{System Overview}
+Reference your architecture diagram (Figure~\ref{fig:arch}).
+
+\begin{figure}[H]
+  \centering
+  % Replace with your actual filename after upload
+  \includegraphics[width=\linewidth]{system_architecture.png}
+  \caption{Overall system architecture of the proposed intelligent tutoring system for sequential digital circuit learning (D flip-flops and simple counters).}
+  \label{fig:arch}
+\end{figure}
+
+\section{Current Progress}
+Be honest and safe:
+\begin{itemize}
+  \item Task 1: scope definition and high-level architecture planned/defined; will be finalised before February.
+  \item Task 2--3: literature/tool review and design preparation are to be carried out next, before implementation.
+\end{itemize}
+
+\section{Ethics}
+State: no human subjects, no sensitive personal data; discussed with supervisor; no ethical issues identified.
+
+\section{Plan and Next Steps}
+Summarise planned work for the next stage: UI prototype, minimal simulation for D flip-flop + counter, initial AI tutor (FAQ/curated knowledge base), integration and basic tests.
+
+\section{Conclusion}
+One short paragraph: scope is clear; plan is feasible; next step is implementation.
+
+\end{document}
+
