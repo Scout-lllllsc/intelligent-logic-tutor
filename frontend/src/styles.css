@@ -266,7 +266,19 @@ textarea {
 .chat-actions {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.action-button {
+  padding: 9px 12px;
+  min-height: 46px;
+}
+
+.action-button strong {
+  display: block;
+  font-size: 0.96rem;
+  line-height: 1.2;
 }
 
 .chat-box {
@@ -284,7 +296,7 @@ textarea {
 
 .ai-chat-box {
   flex: 1;
-  min-height: 220px;
+  min-height: 340px;
   max-height: none;
   overflow-y: auto;
   overflow-x: hidden;
@@ -376,8 +388,18 @@ textarea {
 .truth-table-scroll {
   overflow-y: auto;
   overflow-x: auto;
-  max-height: 240px;
+  max-height: 180px;
   padding-bottom: 4px;
+}
+
+.logic-node.selected,
+.react-flow__node.selected .logic-node,
+.react-flow__node-default.selected,
+.react-flow__node.selected {
+  border-color: #f77f00 !important;
+  box-shadow:
+    0 0 0 3px rgba(247, 127, 0, 0.22),
+    0 18px 28px rgba(247, 127, 0, 0.18) !important;
 }
 
 .truth-table th,
