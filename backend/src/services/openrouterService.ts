@@ -1,5 +1,10 @@
 import axios from "axios";
 import { analyzeCircuit } from "../simulator/engine";
+import {
+  getLocalChatReply,
+  getLocalExplainReply,
+  getLocalPracticeReply
+} from "./localTutorService";
 import type { CircuitData } from "../types/circuit";
 
 const OPENROUTER_URL =
@@ -43,13 +48,7 @@ function buildCircuitSummary(circuit: CircuitData) {
 
 async function callOpenRouter(prompt: string, circuit: CircuitData) {
   if (!OPENROUTER_API_KEY || OPENROUTER_API_KEY === "YOUR_KEY") {
-    return [
-      "OpenRouter is not configured yet.",
-      "Set OPENROUTER_API_KEY in backend/.env to enable AI tutoring.",
-      "",
-      "Circuit context:",
-      buildCircuitSummary(circuit)
-    ].join("\n");
+    throw new Error("OpenRouter is not configured");
   }
 
   try {
@@ -119,19 +118,37 @@ async function callOpenRouter(prompt: string, circuit: CircuitData) {
 }
 
 export async function getExplainReply(circuit: CircuitData) {
-  return callOpenRouter(
-    "Explain how this digital logic circuit behaves, what each gate contributes, and how a student should reason about the signal flow.",
-    circuit
-  );
+  try {
+    return await callOpenRouter(
+      "Explain how this digital logic circuit behaves, what each gate contributes, and how a student should reason about the signal flow.",
+      circuit
+    );
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "OpenRouter unavailable";
+    console.warn("Falling back to local explain tutor", reason);
+    return getLocalExplainReply(circuit, reason);
+  }
 }
 
 export async function getPracticeReply(circuit: CircuitData) {
-  return callOpenRouter(
-    "Generate a practice exercise related to this circuit, including one challenge question and a short hint but not the full answer.",
-    circuit
-  );
+  try {
+    return await callOpenRouter(
+      "Generate a practice exercise related to this circuit, including one challenge question and a short hint but not the full answer.",
+      circuit
+    );
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "OpenRouter unavailable";
+    console.warn("Falling back to local practice tutor", reason);
+    return getLocalPracticeReply(circuit, reason);
+  }
 }
 
 export async function getChatReply(message: string, circuit: CircuitData) {
-  return callOpenRouter(message, circuit);
+  try {
+    return await callOpenRouter(message, circuit);
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "OpenRouter unavailable";
+    console.warn("Falling back to local chat tutor", reason);
+    return getLocalChatReply(message, circuit, reason);
+  }
 }
