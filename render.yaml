@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: intelligent-logic-tutor
+    runtime: node
+    plan: free
+    healthCheckPath: /api/health
+    buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install && npm run build
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: meta-llama/llama-3.3-70b-instruct:free
+      - key: OPENROUTER_URL
+        value: https://openrouter.ai/api/v1/chat/completions
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: APP_SITE_URL
+        sync: false
+      - key: APP_TITLE
+        value: Intelligent Logic Tutor
