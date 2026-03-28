@@ -9,7 +9,12 @@ const gateOptions: Array<{ type: GateType; description: string }> = [
   { type: "NOT", description: "Inverts a single input." },
   { type: "NAND", description: "Inverse of AND." },
   { type: "NOR", description: "Inverse of OR." },
-  { type: "XOR", description: "True when inputs differ." }
+  { type: "XOR", description: "True when inputs differ." },
+  { type: "XNOR", description: "True when inputs are equal." },
+  { type: "BUFFER", description: "Passes one signal through unchanged." },
+  { type: "MUX", description: "Selects D0 or D1 using the S input." },
+  { type: "HALFADDER", description: "Add A and B, then toggle SUM or CARRY output." },
+  { type: "FULLADDER", description: "Add A, B, Cin, then toggle SUM or CARRY output." }
 ];
 
 export function Toolbox() {

@@ -7,7 +7,15 @@ import {
   type NodeChange
 } from "reactflow";
 import { create } from "zustand";
-import type { AnalysisResult, CircuitData, FlowEdge, FlowNode, GateType, Wire } from "../types/circuit";
+import type {
+  AnalysisResult,
+  CircuitData,
+  FlowEdge,
+  FlowNode,
+  GateOutputMode,
+  GateType,
+  Wire
+} from "../types/circuit";
 
 interface CircuitState {
   nodes: FlowNode[];
@@ -21,6 +29,7 @@ interface CircuitState {
   deleteSelection: () => void;
   clearAll: () => void;
   toggleInput: (id: string) => void;
+  setGateOutputMode: (id: string, outputMode: GateOutputMode) => void;
   setAnalysis: (result: AnalysisResult | null) => void;
   getCircuitData: () => CircuitData;
 }
@@ -53,12 +62,15 @@ const initialNodes: FlowNode[] = [
 ];
 
 const initialEdges: FlowEdge[] = [
-  { id: "edge-a-and", source: "input-a", target: "and-1" },
-  { id: "edge-b-and", source: "input-b", target: "and-1" },
-  { id: "edge-and-out", source: "and-1", target: "output-1" }
+  { id: "edge-a-and", source: "input-a", target: "and-1", targetHandle: "in-1" },
+  { id: "edge-b-and", source: "input-b", target: "and-1", targetHandle: "in-2" },
+  { id: "edge-and-out", source: "and-1", target: "output-1", targetHandle: "in-1" }
 ];
 
 function createNode(type: GateType, index: number): FlowNode {
+  const outputMode: GateOutputMode =
+    type === "HALFADDER" || type === "FULLADDER" ? "SUM" : "DEFAULT";
+
   return {
     id: `${type.toLowerCase()}-${Date.now()}-${index}`,
     type: "logicNode",
@@ -66,7 +78,8 @@ function createNode(type: GateType, index: number): FlowNode {
     data: {
       label: `${type} ${index + 1}`,
       gateType: type,
-      value: type === "INPUT" ? false : undefined
+      value: type === "INPUT" ? false : undefined,
+      outputMode
     }
   };
 }
@@ -92,15 +105,28 @@ export const useCircuitStore = create<CircuitState>((set, get) => ({
       edges: applyEdgeChanges(changes, state.edges)
     })),
   onConnect: (connection) =>
-    set((state) => ({
-      edges: addEdge(
-        {
-          ...connection,
-          id: `edge-${Date.now()}`
-        },
-        state.edges
-      )
-    })),
+    set((state) => {
+      const targetHandle = connection.targetHandle || null;
+      const target = connection.target;
+
+      const nextEdges = state.edges.filter((edge) => {
+        if (!target || edge.target !== target) {
+          return true;
+        }
+
+        return (edge.targetHandle || null) !== targetHandle;
+      });
+
+      return {
+        edges: addEdge(
+          {
+            ...connection,
+            id: `edge-${Date.now()}`
+          },
+          nextEdges
+        )
+      };
+    }),
   deleteSelection: () =>
     set((state) => {
       const deletedNodeIds = state.nodes
@@ -145,6 +171,20 @@ export const useCircuitStore = create<CircuitState>((set, get) => ({
         )
       };
     }),
+  setGateOutputMode: (id, outputMode) =>
+    set((state) => ({
+      nodes: state.nodes.map((node) =>
+        node.id === id
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                outputMode
+              }
+            }
+          : node
+      )
+    })),
   setAnalysis: (result) => set({ analysis: result }),
   getCircuitData: () => {
     const state = get();
@@ -157,12 +197,15 @@ export const useCircuitStore = create<CircuitState>((set, get) => ({
         value:
           node.data.gateType === "INPUT"
             ? Boolean(state.inputs[node.id])
-            : node.data.value
+            : node.data.value,
+        outputMode: node.data.outputMode
       })),
       wires: state.edges.map<Wire>((edge) => ({
         id: edge.id,
         source: edge.source,
-        target: edge.target
+        target: edge.target,
+        sourceHandle: edge.sourceHandle,
+        targetHandle: edge.targetHandle
       }))
     };
   }

@@ -1,6 +1,21 @@
 import type { Edge, Node } from "reactflow";
 
-export type GateType = "INPUT" | "OUTPUT" | "AND" | "OR" | "NOT" | "NAND" | "NOR" | "XOR";
+export type GateType =
+  | "INPUT"
+  | "OUTPUT"
+  | "AND"
+  | "OR"
+  | "NOT"
+  | "NAND"
+  | "NOR"
+  | "XOR"
+  | "XNOR"
+  | "BUFFER"
+  | "MUX"
+  | "HALFADDER"
+  | "FULLADDER";
+
+export type GateOutputMode = "DEFAULT" | "SUM" | "CARRY";
 
 export interface Gate {
   id: string;
@@ -11,12 +26,15 @@ export interface Gate {
     y: number;
   };
   value?: boolean;
+  outputMode?: GateOutputMode;
 }
 
 export interface Wire {
   id: string;
   source: string;
   target: string;
+  sourceHandle?: string | null;
+  targetHandle?: string | null;
 }
 
 export interface CircuitData {
@@ -45,6 +63,7 @@ export interface NodeData {
   label: string;
   gateType: GateType;
   value?: boolean;
+  outputMode?: GateOutputMode;
 }
 
 export type FlowNode = Node<NodeData>;

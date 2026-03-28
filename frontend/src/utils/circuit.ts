@@ -14,12 +14,15 @@ export function buildCircuitData(
       value:
         node.data.gateType === "INPUT"
           ? Boolean(inputs[node.id])
-          : node.data.value
+          : node.data.value,
+      outputMode: node.data.outputMode
     })),
     wires: edges.map<Wire>((edge) => ({
       id: edge.id,
       source: edge.source,
-      target: edge.target
+      target: edge.target,
+      sourceHandle: edge.sourceHandle,
+      targetHandle: edge.targetHandle
     }))
   };
 }
