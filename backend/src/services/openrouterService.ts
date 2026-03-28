@@ -10,6 +10,24 @@ const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const APP_SITE_URL = process.env.APP_SITE_URL || "http://localhost:5173";
 const APP_TITLE = process.env.APP_TITLE || "Intelligent Logic Tutor";
 
+function getSafeUrlHeaderValue(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  try {
+    return new URL(trimmed).toString();
+  } catch {
+    return undefined;
+  }
+}
+
+function getSafeHeaderString(value: string) {
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
+
 function buildCircuitSummary(circuit: CircuitData) {
   const analysis = analyzeCircuit(circuit);
   return JSON.stringify(
@@ -35,6 +53,22 @@ async function callOpenRouter(prompt: string, circuit: CircuitData) {
   }
 
   try {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+      "Content-Type": "application/json"
+    };
+
+    const safeReferer = getSafeUrlHeaderValue(APP_SITE_URL);
+    const safeTitle = getSafeHeaderString(APP_TITLE);
+
+    if (safeReferer) {
+      headers["HTTP-Referer"] = safeReferer;
+    }
+
+    if (safeTitle) {
+      headers["X-Title"] = safeTitle;
+    }
+
     const response = await axios.post(
       OPENROUTER_URL,
       {
@@ -52,12 +86,7 @@ async function callOpenRouter(prompt: string, circuit: CircuitData) {
         ]
       },
       {
-        headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-          "HTTP-Referer": APP_SITE_URL,
-          "X-Title": APP_TITLE
-        },
+        headers,
         timeout: 45000
       }
     );
