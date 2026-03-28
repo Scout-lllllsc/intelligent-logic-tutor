@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { chatWithTutor, explainCircuit, practiceCircuit } from "../services/api";
 import { useCircuitStore } from "../store/circuitStore";
 import type { ChatMessage } from "../types/chat";
@@ -23,7 +23,19 @@ export function AIPanel() {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const chatBoxRef = useRef<HTMLDivElement | null>(null);
   const circuit = useMemo(() => buildCircuitData(nodes, edges, inputs), [nodes, edges, inputs]);
+
+  useEffect(() => {
+    if (!chatBoxRef.current) {
+      return;
+    }
+
+    chatBoxRef.current.scrollTo({
+      top: chatBoxRef.current.scrollHeight,
+      behavior: "smooth"
+    });
+  }, [messages, loading]);
 
   const getErrorMessage = (error: unknown, fallback: string) => {
     if (axios.isAxiosError(error)) {
@@ -132,7 +144,7 @@ export function AIPanel() {
 
       <div className="divider" />
 
-      <div className="chat-box ai-chat-box">
+      <div ref={chatBoxRef} className="chat-box ai-chat-box">
         {messages.map((message) => (
           <div key={message.id} className={`message ${message.role}`}>
             {message.content}
