@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useMemo, useState } from "react";
 import { chatWithTutor, explainCircuit, practiceCircuit } from "../services/api";
 import { useCircuitStore } from "../store/circuitStore";
@@ -24,6 +25,21 @@ export function AIPanel() {
   const [loading, setLoading] = useState(false);
   const circuit = useMemo(() => buildCircuitData(nodes, edges, inputs), [nodes, edges, inputs]);
 
+  const getErrorMessage = (error: unknown, fallback: string) => {
+    if (axios.isAxiosError(error)) {
+      const reply = error.response?.data?.reply;
+      if (typeof reply === "string" && reply.trim()) {
+        return reply;
+      }
+
+      if (typeof error.message === "string" && error.message.trim()) {
+        return error.message;
+      }
+    }
+
+    return error instanceof Error ? error.message : fallback;
+  };
+
   const appendAssistantReply = (reply: string) => {
     setMessages((current) => [
       ...current,
@@ -48,9 +64,7 @@ export function AIPanel() {
       const response = await request();
       appendAssistantReply(response.reply);
     } catch (error) {
-      appendAssistantReply(
-        error instanceof Error ? error.message : `${action} request failed.`
-      );
+      appendAssistantReply(getErrorMessage(error, `${action} request failed.`));
     } finally {
       setLoading(false);
     }
@@ -70,9 +84,7 @@ export function AIPanel() {
       const response = await chatWithTutor(prompt, circuit);
       appendAssistantReply(response.reply);
     } catch (error) {
-      appendAssistantReply(
-        error instanceof Error ? error.message : "Chat request failed."
-      );
+      appendAssistantReply(getErrorMessage(error, "Chat request failed."));
     } finally {
       setLoading(false);
     }
