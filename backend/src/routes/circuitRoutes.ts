@@ -21,6 +21,7 @@ router.post("/explain", async (req, res) => {
     const reply = await getExplainReply(circuit);
     res.json({ reply });
   } catch (error) {
+    console.error("Explain route failed", error);
     res.status(500).json({
       reply: error instanceof Error ? error.message : "Failed to explain circuit."
     });
@@ -33,6 +34,7 @@ router.post("/practice", async (req, res) => {
     const reply = await getPracticeReply(circuit);
     res.json({ reply });
   } catch (error) {
+    console.error("Practice route failed", error);
     res.status(500).json({
       reply: error instanceof Error ? error.message : "Failed to generate practice task."
     });
@@ -46,6 +48,7 @@ router.post("/chat", async (req, res) => {
     const reply = await getChatReply(message, circuit);
     res.json({ reply });
   } catch (error) {
+    console.error("Chat route failed", error);
     res.status(500).json({
       reply: error instanceof Error ? error.message : "Failed to process chat request."
     });
