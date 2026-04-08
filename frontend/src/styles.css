@@ -438,7 +438,7 @@ textarea {
 .truth-table-scroll {
   overflow-y: auto;
   overflow-x: auto;
-  max-height: 240px;
+  max-height: 340px;
   padding-bottom: 4px;
 }
 
