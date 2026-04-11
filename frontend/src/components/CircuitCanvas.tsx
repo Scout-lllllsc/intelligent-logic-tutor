@@ -1,6 +1,7 @@
 import { Background, Controls, MiniMap, ReactFlow, ReactFlowProvider } from "reactflow";
 import { useCircuitStore } from "../store/circuitStore";
 import { LogicNode } from "./LogicNode";
+import { TruthTable } from "./TruthTable";
 
 const nodeTypes = {
   logicNode: LogicNode
@@ -50,23 +51,57 @@ function CircuitCanvasInner() {
         </ReactFlow>
       </div>
 
-      {analysis ? (
-        <div className="analysis-card">
-          <strong>Live analysis</strong>
-          <span>{analysis.summary}</span>
-          {analysis.errors.length > 0 ? (
-            <ul className="analysis-list">
-              {analysis.errors.map((error) => (
-                <li key={error}>{error}</li>
-              ))}
-            </ul>
-          ) : null}
+      <div className="canvas-bottom-row">
+        {analysis ? (
+          <div className="analysis-card">
+            <div className="panel-title">
+              <strong>Live analysis</strong>
+              <span className="panel-caption">Validation feedback updates automatically.</span>
+            </div>
+            <span>{analysis.summary}</span>
+            {analysis.errors.length > 0 ? (
+              <ul className="analysis-list">
+                {analysis.errors.map((error) => (
+                  <li key={error}>{error}</li>
+                ))}
+              </ul>
+            ) : (
+              <div className="analysis-note">No validation errors detected.</div>
+            )}
+            {analysis.warnings.length > 0 ? (
+              <ul className="analysis-list warning-list">
+                {analysis.warnings.map((warning) => (
+                  <li key={warning}>{warning}</li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        ) : (
+          <div className="analysis-card empty-panel">
+            <strong>Live analysis</strong>
+            <span className="empty-state">
+              Add or connect nodes to generate validation feedback and simulation results.
+            </span>
+          </div>
+        )}
+
+        <div className="truth-table-card">
+          <div className="truth-table-header">
+            <div className="truth-table-copy">
+              <strong>Truth Table</strong>
+              <span className="panel-caption">
+                All input and output combinations for the current circuit.
+              </span>
+            </div>
+            <span className="chip">
+              <strong>{analysis?.truthTable.length ?? 0}</strong> rows
+            </span>
+          </div>
+          <div className="truth-table-scroll truth-table-scroll-expanded">
+            <TruthTable rows={analysis?.truthTable ?? []} />
+          </div>
         </div>
-      ) : (
-        <div className="empty-state">
-          Add or connect nodes to generate validation feedback and truth table analysis.
-        </div>
-      )}
+      </div>
     </section>
   );
 }

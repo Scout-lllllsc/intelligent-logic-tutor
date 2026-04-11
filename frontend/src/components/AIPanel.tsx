@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { chatWithTutor, explainCircuit, practiceCircuit } from "../services/api";
 import { useCircuitStore } from "../store/circuitStore";
 import type { ChatMessage } from "../types/chat";
-import { TruthTable } from "./TruthTable";
 import { buildCircuitData } from "../utils/circuit";
 
 const initialMessages: ChatMessage[] = [
@@ -171,15 +170,6 @@ export function AIPanel() {
           <button className="primary-button" disabled={loading} onClick={sendChat}>
             {loading ? "Waiting..." : "Send"}
           </button>
-        </div>
-      </div>
-
-      <div className="divider" />
-
-      <div className="truth-table-panel">
-        <h3 className="section-title">Truth Table</h3>
-        <div className="truth-table-scroll">
-          <TruthTable rows={analysis?.truthTable ?? []} />
         </div>
       </div>
     </div>

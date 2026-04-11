@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { NodeProps } from "reactflow";
 import { Handle, Position } from "reactflow";
 import { useCircuitStore } from "../store/circuitStore";
@@ -51,6 +52,9 @@ const inputHandleMap: Record<GateType, Array<{ id: string; label: string; top: s
 export function LogicNode({ id, data, selected }: NodeProps<NodeData>) {
   const toggleInput = useCircuitStore((state) => state.toggleInput);
   const setGateOutputMode = useCircuitStore((state) => state.setGateOutputMode);
+  const renameNode = useCircuitStore((state) => state.renameNode);
+  const [isEditingLabel, setIsEditingLabel] = useState(false);
+  const [draftLabel, setDraftLabel] = useState(data.label);
   const className =
     data.gateType === "INPUT"
       ? "logic-node input-node"
@@ -60,6 +64,26 @@ export function LogicNode({ id, data, selected }: NodeProps<NodeData>) {
 
   const handles = inputHandleMap[data.gateType];
   const showOutputMode = data.gateType === "HALFADDER" || data.gateType === "FULLADDER";
+
+  useEffect(() => {
+    setDraftLabel(data.label);
+  }, [data.label]);
+
+  const startEditingLabel = () => {
+    setDraftLabel(data.label);
+    setIsEditingLabel(true);
+  };
+
+  const cancelEditingLabel = () => {
+    setDraftLabel(data.label);
+    setIsEditingLabel(false);
+  };
+
+  const commitLabel = () => {
+    renameNode(id, draftLabel);
+    setDraftLabel(draftLabel.trim() || data.label);
+    setIsEditingLabel(false);
+  };
 
   const renderModeButton = (mode: GateOutputMode, label: string) => (
     <button
@@ -80,10 +104,62 @@ export function LogicNode({ id, data, selected }: NodeProps<NodeData>) {
           <Handle id={handle.id} type="target" position={Position.Left} style={{ top: "50%" }} />
         </div>
       ))}
-      <div className="node-label">{data.label}</div>
+      <div className="node-header">
+        {isEditingLabel ? (
+          <input
+            autoFocus
+            className="node-label-input nodrag nopan"
+            maxLength={32}
+            onBlur={commitLabel}
+            onChange={(event) => setDraftLabel(event.target.value)}
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                commitLabel();
+              }
+
+              if (event.key === "Escape") {
+                event.preventDefault();
+                cancelEditingLabel();
+              }
+            }}
+            value={draftLabel}
+          />
+        ) : (
+          <>
+            <div
+              className="node-label"
+              onDoubleClick={(event) => {
+                event.stopPropagation();
+                startEditingLabel();
+              }}
+              title="Double-click to rename"
+            >
+              {data.label}
+            </div>
+            <button
+              className="node-edit-button nodrag nopan"
+              onClick={(event) => {
+                event.stopPropagation();
+                startEditingLabel();
+              }}
+              type="button"
+            >
+              Rename
+            </button>
+          </>
+        )}
+      </div>
       <div className="node-value">Type: {data.gateType}</div>
       {data.gateType === "INPUT" ? (
-        <button className="input-toggle" onClick={() => toggleInput(id)}>
+        <button
+          className="input-toggle nodrag nopan"
+          onClick={(event) => {
+            event.stopPropagation();
+            toggleInput(id);
+          }}
+        >
           Signal: {data.value ? "1" : "0"}
         </button>
       ) : (

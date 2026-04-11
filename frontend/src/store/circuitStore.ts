@@ -23,6 +23,7 @@ interface CircuitState {
   inputs: Record<string, boolean>;
   analysis: AnalysisResult | null;
   addGate: (type: GateType) => void;
+  renameNode: (id: string, label: string) => void;
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: (connection: Connection) => void;
@@ -67,16 +68,22 @@ const initialEdges: FlowEdge[] = [
   { id: "edge-and-out", source: "and-1", target: "output-1", targetHandle: "in-1" }
 ];
 
+function normalizeNodeLabel(label: string, fallback: string) {
+  const trimmed = label.trim();
+  return trimmed.length > 0 ? trimmed : fallback;
+}
+
 function createNode(type: GateType, index: number): FlowNode {
   const outputMode: GateOutputMode =
     type === "HALFADDER" || type === "FULLADDER" ? "SUM" : "DEFAULT";
+  const defaultLabel = `${type} ${index + 1}`;
 
   return {
     id: `${type.toLowerCase()}-${Date.now()}-${index}`,
     type: "logicNode",
     position: { x: 160 + ((index % 3) * 190), y: 100 + ((index % 4) * 110) },
     data: {
-      label: `${type} ${index + 1}`,
+      label: defaultLabel,
       gateType: type,
       value: type === "INPUT" ? false : undefined,
       outputMode
@@ -95,6 +102,20 @@ export const useCircuitStore = create<CircuitState>((set, get) => ({
   addGate: (type) =>
     set((state) => ({
       nodes: [...state.nodes, createNode(type, state.nodes.length + 1)]
+    })),
+  renameNode: (id, label) =>
+    set((state) => ({
+      nodes: state.nodes.map((node) =>
+        node.id === id
+          ? {
+              ...node,
+              data: {
+                ...node.data,
+                label: normalizeNodeLabel(label, node.data.label)
+              }
+            }
+          : node
+      )
     })),
   onNodesChange: (changes) =>
     set((state) => ({

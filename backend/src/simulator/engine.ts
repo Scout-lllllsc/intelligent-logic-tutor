@@ -64,6 +64,20 @@ function getExpectedInputCount(gate: Gate) {
   }
 }
 
+function buildUniqueGateLabels(gates: Gate[]) {
+  const seen = new Map<string, number>();
+  const labels = new Map<string, string>();
+
+  for (const gate of gates) {
+    const baseLabel = gate.label.trim() || gate.id;
+    const currentCount = (seen.get(baseLabel) || 0) + 1;
+    seen.set(baseLabel, currentCount);
+    labels.set(gate.id, currentCount === 1 ? baseLabel : `${baseLabel} (${currentCount})`);
+  }
+
+  return labels;
+}
+
 function evaluateAdder(
   type: "HALFADDER" | "FULLADDER",
   inputs: boolean[],
@@ -185,6 +199,8 @@ export function propagateSignals(
 export function generateTruthTable(circuit: CircuitData): TruthTableRow[] {
   const inputs = circuit.gates.filter((gate) => gate.type === "INPUT");
   const outputs = circuit.gates.filter((gate) => gate.type === "OUTPUT");
+  const inputLabels = buildUniqueGateLabels(inputs);
+  const outputLabels = buildUniqueGateLabels(outputs);
   const rows: TruthTableRow[] = [];
   const combinations = 2 ** inputs.length;
 
@@ -201,10 +217,10 @@ export function generateTruthTable(circuit: CircuitData): TruthTableRow[] {
     const { signalMap } = propagateSignals(circuit, assignment);
     rows.push({
       inputs: Object.fromEntries(
-        inputs.map((gate) => [gate.label || gate.id, Boolean(signalMap[gate.id])])
+        inputs.map((gate) => [inputLabels.get(gate.id) || gate.id, Boolean(signalMap[gate.id])])
       ),
       outputs: Object.fromEntries(
-        outputs.map((gate) => [gate.label || gate.id, Boolean(signalMap[gate.id])])
+        outputs.map((gate) => [outputLabels.get(gate.id) || gate.id, Boolean(signalMap[gate.id])])
       )
     });
   }
